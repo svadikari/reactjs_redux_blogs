@@ -28,7 +28,7 @@ function App() {
     } else {
       root.classList.remove("dark");
     }
-  }, [dispatch]);
+  }, [theme, dispatch]);
 
   return (
     <div className="flex flex-col md:mx-20 min-h-screen">

@@ -49,7 +49,6 @@ export const fetchAllBlogs = createAsyncThunk<Blog[]>(
 
 export const fetchBlogById = createAsyncThunk<Blog, string>(
   "blogs/fetchBlogById",
-  // if you type your function argument here
   async (id: string) => {
     const response = await fetch(`${API_URL}/${id}`);
     return (await response.json()) as Blog;
@@ -67,6 +66,33 @@ export const addBlog = createAsyncThunk<Blog, Blog>(
       body: JSON.stringify(blog),
     });
     return resp.json() as Blog;
+  }
+);
+
+export const updateBlog = createAsyncThunk<Blog, Blog>(
+  "blogs/updateBlog",
+  async (blog: Blog) => {
+    const resp = await fetch(`${API_URL}/${blog.id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(blog),
+    });
+    //return resp.json() as Blog;
+    console.log(resp.json());
+    return blog as Blog;
+  }
+);
+
+export const deleteBlog = createAsyncThunk<string, string>(
+  "blogs/deleteBlog",
+  async (id: string) => {
+    const response = await fetch(`${API_URL}/${id}`, {
+      method: "DELETE",
+    });
+    console.log("Blog Deleted Response: ", response.statusText);
+    return response.ok ? id : "";
   }
 );
 
@@ -126,6 +152,46 @@ const blogsSlice = createSlice({
         state.blogs.push(action.payload);
       })
       .addCase(addBlog.rejected, (state, action) => {
+        state.loading = "idle";
+        if (action.payload) {
+          state.error = action.payload.toString();
+        } else {
+          state.error = action.error.message
+            ? action.error.message.toString()
+            : "";
+        }
+      })
+      .addCase(updateBlog.pending, (state) => {
+        state.loading = "pending";
+      })
+      .addCase(updateBlog.fulfilled, (state, action: PayloadAction<Blog>) => {
+        state.loading = "idle";
+        state.blogs = state.blogs.map((blog) =>
+          blog.id === action.payload.id ? { ...blog, ...action.payload } : blog
+        );
+      })
+      .addCase(updateBlog.rejected, (state, action) => {
+        state.loading = "idle";
+        if (action.payload) {
+          state.error = action.payload.toString();
+        } else {
+          state.error = action.error.message
+            ? action.error.message.toString()
+            : "";
+        }
+      })
+      .addCase(deleteBlog.pending, (state) => {
+        state.loading = "pending";
+      })
+      .addCase(deleteBlog.fulfilled, (state, action: PayloadAction<string>) => {
+        state.loading = "idle";
+        const deltedBlogId = action.payload?.toString();
+        if (deltedBlogId) {
+          const blogId = Number(deltedBlogId);
+          state.blogs = state.blogs.filter((blog) => blog.id !== blogId);
+        }
+      })
+      .addCase(deleteBlog.rejected, (state, action) => {
         state.loading = "idle";
         if (action.payload) {
           state.error = action.payload.toString();
