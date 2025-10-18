@@ -1,33 +1,49 @@
-import { useState, type FormEvent } from "react";
-import { Link, useNavigate } from "react-router";
-import { useDispatch } from "react-redux";
-import { addBlog } from "./blogSlice";
-import type { AppDispatch } from "../store/rootStore";
+import { useEffect, useState, type FormEvent } from "react";
+import type { AppDispatch, RootState } from "../store/rootStore";
+import { useDispatch, useSelector } from "react-redux";
+import { addBlog, fetchBlogById } from "./blogSlice";
+import { Link, useNavigate, useParams } from "react-router";
 
-const NewBlog = () => {
+const BlogDetails = () => {
+  const { blogId } = useParams();
   const navigate = useNavigate();
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
+  const [error, setError] = useState("");
 
   const dispatch: AppDispatch = useDispatch();
+  const blog = useSelector((state: RootState) =>
+    state.blog.blogs.find((blog) => blog.id?.toString() === blogId)
+  );
 
-  const validForm = title && body;
+  useEffect(() => {
+    dispatch(fetchBlogById(blogId!));
+  }, [dispatch]);
 
   const onSubmitForm = (e: FormEvent) => {
     e.preventDefault();
     if (title && body) {
-      const blog = {
-        title,
-        body,
-        userId: 2,
-      };
-      dispatch(addBlog(blog));
+      dispatch(addBlog({ id: Number(blogId), title, body, userId: 4 }));
+      navigate("/");
+    } else {
+      setError("Update title/body to take the effect!");
     }
-    navigate("/");
   };
 
   return (
     <div className="flex flex-col shadow-xl m-4 justify-items-center">
+      <span className="m-5 font-bold text-center text-2xl">
+        Update Blog Details{" "}
+      </span>
+      {error && (
+        <div
+          className="mx-20 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative fade-out-animation"
+          role="alert"
+        >
+          <strong className="font-bold mr-3">Error!</strong>
+          <span className="block sm:inline">{error}</span>
+        </div>
+      )}
       <form
         className="flex flex-col shadow-xl m-6 justify-items-center"
         onSubmit={(e) => onSubmitForm(e)}
@@ -39,6 +55,7 @@ const NewBlog = () => {
             id="title"
             placeholder="Title 1"
             required
+            defaultValue={blog?.title}
             onChange={(e) => setTitle(e.target.value)}
           />
         </div>
@@ -48,20 +65,16 @@ const NewBlog = () => {
             id="body"
             placeholder="Content 1"
             required
+            defaultValue={blog?.body}
             onChange={(e) => setBody(e.target.value)}
           ></textarea>
         </div>
         <div className="flex flex-row my-2 justify-center justify-items-center">
           <button
             type="submit"
-            disabled={!validForm}
-            className={`py-2 rounded-md ${
-              validForm
-                ? " bg-indigo-600 text-white hover:bg-indigo-700 font-semibold transition"
-                : "!bg-gray-500"
-            }`}
+            className={`py-2 rounded-md ${" bg-indigo-600 text-white hover:bg-indigo-700 font-semibold transition"}`}
           >
-            <span className="p-4">Add Blog</span>
+            <span className="p-4">Update Blog</span>
           </button>
           <Link
             to="/"
@@ -75,4 +88,4 @@ const NewBlog = () => {
   );
 };
 
-export default NewBlog;
+export default BlogDetails;

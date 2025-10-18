@@ -1,17 +1,15 @@
-import type { Blog } from "../Blog"
-import BlogDetail from "./BlogDetail"
+import type { Blog } from "../Blog";
+import BlogItem from "./BlogItem";
 
 const BlogList = ({ blogs }: { blogs: Blog[] }) => {
-    return (
-        <>
-            <h1>Blogs</h1>
-            {
-                blogs.map(blog => (
-                    <BlogDetail key={blog.id} blog={blog} />
-                ))
-            }
-        </>
-    )
-}
+  return (
+    <>
+      <span className="text-2xl font-bold mb-8">Blogs</span>
+      {blogs.map((blog) => (
+        <BlogItem key={blog.id} blog={blog} />
+      ))}
+    </>
+  );
+};
 
-export default BlogList
+export default BlogList;

@@ -1,7 +1,7 @@
 export type Blog = {
-    id: number;
-    title: string;
-    content: string;
-    userId: number;
-    createdAt: Date;
-}
+  id?: number;
+  title?: string;
+  body?: string;
+  userId?: number;
+  createdAt?: Date;
+};
